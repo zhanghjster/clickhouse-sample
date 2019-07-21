@@ -1,0 +1,20 @@
+version: '3'
+services:
+  clickhouse:
+    container_name: clickhouse
+    image: yandex/clickhouse-server
+    ports:
+        - "8123:8123"
+        - "9000:9000"
+    volumes:
+      - /Users/Ben/dev/clickhouse/data:/var/lib/clickhouse
+      - /Users/Ben/dev/clickhouse:/opt/clickhouse
+    ulimits:
+        nofile:
+            soft: 262144
+            hard: 262144
+  tabix:
+    container_name: tabix
+    image: spoonest/clickhouse-tabix-web-client
+    ports:
+        - "8080:80"
