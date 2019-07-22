@@ -61,10 +61,35 @@ Clickhouse适用典型的OLAP场景
 ##### 引擎类型
 
 * MergeTree
-  * MergeTree
-  * SummingMergeTree
-  * AggregationgMergeTree
-  * 
+
+  clickhouse最强大的引擎，适用于分批大量写入场景
+
+  * 数据按照主键排序，用主键实现快速检索
+  * 使用分区，检索条件里包含分区字段的情况下会加速查询。类似分表
+  * 支持副本
+  * 支持采样
+
+  ~~~sql
+  CREATE TABLE [IF NOT EXISTS] [db.]table_name [ON CLUSTER cluster]
+  (
+      name1 [type1] [DEFAULT|MATERIALIZED|ALIAS expr1],
+      name2 [type2] [DEFAULT|MATERIALIZED|ALIAS expr2],
+      ...
+      INDEX index_name1 expr1 TYPE type1(...) GRANULARITY value1,
+      INDEX index_name2 expr2 TYPE type2(...) GRANULARITY value2
+  ) ENGINE = MergeTree()
+  [PARTITION BY expr]
+  [ORDER BY expr]
+  [PRIMARY KEY expr]
+  [SAMPLE BY expr]
+  [SETTINGS name=value, ...]
+  ~~~
+
+  * partition by，分区字段，partition by (clumn1, column2), 分区键要谨慎选择，不宜分的过于精细，比如超过1000个分区
+  * order by，排序字段
+  * primary key，主键，不设置时候为和order by字段相同
+  * sample by，取样键
+
 * 其他
 
 #### 测试
@@ -84,7 +109,7 @@ ORDER BY (Minute,MetricId)
 
 ##### 写入
 
-10万个metric，每个metric每分钟10条数据，连续写入1分钟的数据
+10万个metric，每个metric每分钟10条数据
 
 ~~~
 10000000行，prepare 16秒, commit 2秒
